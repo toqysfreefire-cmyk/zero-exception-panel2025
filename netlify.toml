@@ -1,0 +1,24 @@
+# Netlify Configuration for ZERO EXCEPTION Game Panel Store
+
+[build]
+  publish = "."
+
+# SPA & Clean URL Redirects
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+# Prevent aggressive CDN caching on data files so updates show immediately
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"

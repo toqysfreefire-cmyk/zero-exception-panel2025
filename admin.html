@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZERO EXCEPTION | Ultimate Admin Console & Store Engine</title>
+    <meta name="description" content="Centralized management console for ZERO EXCEPTION digital panel store. Add products, configure payments, and sync instantly to Vercel.">
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Admin Stylesheet -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <!-- ============================================================
+         ADMIN LOGIN GATEWAY SCREEN
+         Default: tgsgaming2024@gmail.com / Sweet+candy2026
+         ============================================================ -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-brand">
+                <img src="images/logo.jpg" alt="ZERO EXCEPTION" class="login-brand-img">
+                <h2>ZERO <span>EXCEPTION</span></h2>
+                <p>Master Store Management & Vercel Control Panel</p>
+            </div>
+
+            <div class="login-error" id="loginError">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="loginErrorMsg">Invalid email or password. Please try again.</span>
+            </div>
+
+            <form class="login-form" id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <div class="input-icon-wrap">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" required placeholder="Enter admin email" value="" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <div class="input-icon-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" required placeholder="Enter admin password" value="" autocomplete="new-password">
+                        <i class="fas fa-eye toggle-password" id="togglePasswordBtn"></i>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 2px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--adm-text-secondary); text-transform: none; font-weight: normal;">
+                        <input type="checkbox" id="rememberMe" style="width: auto;"> Remember login on this device
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginSubmitBtn">
+                    <i class="fas fa-shield-alt"></i> Access Admin Console
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MAIN ADMIN CONSOLE APPLICATION
+         ============================================================ -->
+    <div class="adm-app" id="adminApp" style="display: none;">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="adm-sidebar" id="admSidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.jpg" alt="Logo" class="sidebar-brand-img">
+                <div class="sidebar-brand-info">
+                    <h3>ZERO <span>ADMIN</span></h3>
+                    <p>Live Store Engine</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-link-btn active" data-tab="tab-products">
+                    <i class="fas fa-boxes"></i> All Products
+                </button>
+                <button class="nav-link-btn" data-tab="tab-editor">
+                    <i class="fas fa-plus-circle"></i> Add / Edit Product
+                </button>
+                <button class="nav-link-btn" data-tab="tab-payments">
+                    <i class="fas fa-credit-card"></i> Payment Gateways
+                </button>
+                <button class="nav-link-btn" data-tab="tab-notices">
+                    <i class="fas fa-bullhorn"></i> Notices & Support
+                </button>
+                <button class="nav-link-btn" data-tab="tab-currencies">
+                    <i class="fas fa-coins"></i> Currencies & Rates
+                </button>
+                <button class="nav-link-btn" data-tab="tab-sync">
+                    <i class="fas fa-rocket"></i> Vercel & Catalog Hub
+                </button>
+                <button class="nav-link-btn" data-tab="tab-backup">
+                    <i class="fas fa-database"></i> Backup & Reset
+                </button>
+                <button class="nav-link-btn" data-tab="tab-admins" id="navBtnAdmins">
+                    <i class="fas fa-users-cog"></i> Admin Team & Roles
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="index.html" target="_blank" class="btn-store-link">
+                    <i class="fas fa-external-link-alt"></i> View Live Store
+                </a>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW AREA -->
+        <main class="adm-main">
+            <!-- Topbar Header -->
+            <header class="adm-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="topbar-title" id="topbarTitle">Product Catalog Manager</h2>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="sync-status-badge local-draft" id="syncStatusBadge">
+                        <span class="status-indicator-dot"></span>
+                        <span id="syncStatusText">Checking Sync...</span>
+                    </div>
+
+                    <button class="btn-publish-netlify" id="btnDeployNetlifyTop" title="Deploy updates to Vercel for all customers">
+                        <i class="fas fa-rocket"></i> <span>Deploy to Vercel</span>
+                    </button>
+
+                    <div class="admin-user-pill" id="adminUserPill">
+                        <i class="fas fa-crown" style="color: #FACC15;" id="adminRoleIcon"></i>
+                        <span id="currentAdminEmail" style="font-weight: 700; color: var(--adm-text);">tgsgaming2024@gmail.com</span>
+                        <span class="badge-tag" id="currentAdminBadge" style="background: rgba(250, 204, 21, 0.2); color: #FACC15; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px;">SUPER ADMIN</span>
+                    </div>
+
+                    <button class="btn-add-quick" id="quickAddProductBtn">
+                        <i class="fas fa-plus"></i> <span>Add Product</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="adm-content">
+
+                <!-- Smart Deployment Alert Banner -->
+                <div class="deploy-alert-banner" id="deployAlertBanner">
+                    <div class="deploy-alert-icon">
+                        <i class="fas fa-check-circle" style="color: var(--adm-accent);"></i>
+                    </div>
+                    <div class="deploy-alert-body">
+                        <h4 id="deployAlertTitle">Store Catalog Active</h4>
+                        <p id="deployAlertText">Edits in this console save immediately to your store. Click <strong>Download products.json</strong> to publish your latest products live to Vercel.</p>
+                    </div>
+                    <div class="deploy-alert-actions">
+                        <button class="btn-alert-action primary" id="btnAlertExport">
+                            <i class="fas fa-file-download"></i> Download products.json
+                        </button>
+                        <button class="btn-alert-action secondary" id="btnCopyJsonQuick" title="Copy JSON directly to clipboard">
+                            <i class="fas fa-copy"></i> Copy JSON
+                        </button>
+                        <button class="btn-alert-action secondary" id="btnCleanDuplicatesAlert" title="Clean any (Copy) test duplicates">
+                            <i class="fas fa-broom"></i> Clean Duplicates
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview Banner -->
+                <div class="adm-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon cyan"><i class="fas fa-gamepad"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statTotalProducts">18</h4>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-tags"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statTotalCategories">6</h4>
+                            <p>Active Categories</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-wallet"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statActivePayments">5</h4>
+                            <p>Payment Gateways</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-bolt"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statNetlifyMode">Instant Live</h4>
+                            <p>Vercel Sync Engine</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     TAB 1: PRODUCT CATALOG MANAGER
+                     ============================================================ -->
+                <section class="tab-pane active" id="tab-products">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Product Catalog Management</h3>
+                                <p>View, search, edit, clone or delete products. All updates sync cleanly across your Vercel site.</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-primary-save" id="btnGoToAddNew">
+                                    <i class="fas fa-plus"></i> Add New Product
+                                </button>
+                                <button class="btn-secondary-cancel" id="btnQuickExportProducts" title="Download fresh products.json">
+                                    <i class="fas fa-download"></i> Export products.json
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Toolbar & Search -->
+                        <div class="catalog-toolbar">
+                            <div class="catalog-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="catalogSearchInput" placeholder="Search by product name, category, or features...">
+                            </div>
+
+                            <div class="catalog-actions-bar">
+                                <div class="category-filter-chips" id="categoryChipsContainer">
+                                    <button class="chip-btn active" data-cat="all">All (<span id="countAll">18</span>)</button>
+                                    <button class="chip-btn" data-cat="non-root">Non Root (<span id="countNonRoot">0</span>)</button>
+                                    <button class="chip-btn" data-cat="root">Root (<span id="countRoot">0</span>)</button>
+                                    <button class="chip-btn" data-cat="ios">iOS (<span id="countIos">0</span>)</button>
+                                    <button class="chip-btn" data-cat="pc">PC (<span id="countPc">0</span>)</button>
+                                    <button class="chip-btn" data-cat="pubg">PUBG (<span id="countPubg">0</span>)</button>
+                                    <button class="chip-btn" data-cat="demo">Tools (<span id="countDemo">0</span>)</button>
+                                </div>
+
+                                <div class="toolbar-tool-buttons">
+                                    <button class="btn-tool-secondary" id="btnCleanDuplicates" title="Clean any duplicate (Copy) products created during testing">
+                                        <i class="fas fa-broom"></i> Clean Duplicates
+                                    </button>
+                                    <button class="btn-tool-secondary" id="btnReloadFromServer" title="Reload original clean catalog from products.json">
+                                        <i class="fas fa-sync-alt"></i> Reset to Server
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products Cards Grid -->
+                        <div class="products-cards-grid" id="productsCardsGrid">
+                            <!-- Dynamically rendered by admin.js -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 2: ADD / EDIT PRODUCT
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-editor">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3 id="editorFormHeading">➕ Add New Product</h3>
+                                <p id="editorFormSubtitle">Configure product details, duration packages, pricing, and high quality thumbnail.</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn-secondary-cancel" id="btnCancelEditor">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="productEditorForm">
+                            <input type="hidden" id="editProductId" value="">
+
+                            <div class="editor-grid">
+                                <!-- Left Column: Main Fields -->
+                                <div style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div class="form-group">
+                                        <label>Product Title *</label>
+                                        <input type="text" id="prodTitle" required placeholder="e.g. VIP ALPHA DRIP CLIENT NON ROOT">
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Category *</label>
+                                            <select id="prodCategory" required>
+                                                <option value="non-root">Free Fire NON ROOT</option>
+                                                <option value="root">FREE FIRE ROOT</option>
+                                                <option value="ios">FREE FIRE IOS</option>
+                                                <option value="pc">FREE FIRE PC</option>
+                                                <option value="pubg">PUBG MOBILE</option>
+                                                <option value="demo">DEMO / TOOLS</option>
+                                                <option value="custom">+ Create Custom Category</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group" id="customCategoryWrap" style="display: none;">
+                                            <label>Custom Category Name *</label>
+                                            <input type="text" id="prodCustomCategoryName" placeholder="e.g. CALL OF DUTY MOBILE">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Status Badge Type</label>
+                                            <select id="prodStatus">
+                                                <option value="online">Online (Green)</option>
+                                                <option value="new">New (Cyan Accent)</option>
+                                                <option value="warning">Warning / Kernel (Orange)</option>
+                                                <option value="maintenance">Maintenance (Red)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Starting Base Price (BDT ৳) *</label>
+                                            <input type="number" id="prodBasePrice" required placeholder="53">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Old Regular Price (BDT ৳)</label>
+                                            <input type="number" id="prodOldPrice" placeholder="112">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Discount Tag (Auto or Custom)</label>
+                                            <input type="text" id="prodDiscount" placeholder="e.g. 52% OFF">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Status Text Badge</label>
+                                            <input type="text" id="prodStatusText" placeholder="e.g. Update Released, Anti-Ban 100%, New Version">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Description & Features</label>
+                                        <textarea id="prodDescription" rows="3" placeholder="Provide product features, ESP locator, aimbot settings, injector instructions..."></textarea>
+                                    </div>
+
+                                    <!-- Duration Packages Builder -->
+                                    <div class="packages-editor-container">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <h4 style="font-size: 14px; font-weight: 800;">⏳ Duration Packages & Pricing</h4>
+                                                <p style="font-size: 11.5px; color: var(--adm-text-secondary);">Define available package durations (e.g. 1 Day, 7 Days, 30 Days) with corresponding prices.</p>
+                                            </div>
+                                            <button type="button" class="btn-add-quick" id="btnAddPackageRow" style="padding: 5px 12px; font-size: 11.5px;">
+                                                <i class="fas fa-plus"></i> Add Package
+                                            </button>
+                                        </div>
+
+                                        <div id="packagesListContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                                            <!-- Dynamically added package rows -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Image & Media -->
+                                <div style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div class="image-upload-box">
+                                        <img id="imagePreview" src="images/logo.jpg" alt="Preview" class="image-preview-large">
+                                        
+                                        <div style="width: 100%;">
+                                            <label style="font-size: 11px; font-weight: 700; color: var(--adm-text-secondary); text-transform: uppercase;">Image Path / URL</label>
+                                            <input type="text" id="prodImageUrl" placeholder="images/drip_client_non_root.png or URL" style="margin-top: 4px;">
+                                        </div>
+
+                                        <div style="display: flex; gap: 8px; width: 100%;">
+                                            <input type="file" id="prodImageFileInput" accept="image/*" style="display: none;">
+                                            <button type="button" class="btn-store-link" id="btnUploadImageFile" style="flex: 1; justify-content: center;">
+                                                <i class="fas fa-upload"></i> Upload Image File
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="adm-panel" style="padding: 16px;">
+                                        <label style="font-size: 11.5px; font-weight: 800; color: var(--adm-text-secondary); text-transform: uppercase;">Quick Preset Images</label>
+                                        <p style="font-size: 11px; color: var(--adm-text-muted); margin-bottom: 10px;">Click any image to assign it instantly:</p>
+                                        <div class="preset-images-scroll" id="presetImagesContainer">
+                                            <!-- Filled by JS with images from project -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-action-buttons">
+                                <button type="submit" class="btn-primary-save" id="btnSaveProduct">
+                                    <i class="fas fa-save"></i> <span>Save Product</span>
+                                </button>
+                                <button type="button" class="btn-secondary-cancel" id="btnResetProductForm">
+                                    <i class="fas fa-undo"></i> Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 3: PAYMENT GATEWAYS CONTROLLER
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-payments">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Payment Gateways & Wallet Numbers</h3>
+                                <p>Control the payment numbers shown on checkout. Customers copy these numbers when paying with bKash, Nagad, Rocket or Binance.</p>
+                            </div>
+                            <button class="btn-primary-save" id="btnSavePaymentSettings">
+                                <i class="fas fa-save"></i> Save Payment Settings
+                            </button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+                            <!-- bKash -->
+                            <div class="adm-panel" style="border-top: 3px solid #E2136E;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h4 style="color: #F472B6; font-size: 15px;"><i class="fas fa-mobile-alt"></i> bKash</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                                        <input type="checkbox" id="payBkashActive" checked style="width: auto;"> Active
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label>Account Number</label>
+                                    <input type="text" id="payBkashNumber" value="01718404195">
+                                </div>
+                                <div class="form-group">
+                                    <label>Account Type / Name</label>
+                                    <input type="text" id="payBkashName" value="bKash Personal">
+                                </div>
+                            </div>
+
+                            <!-- Nagad -->
+                            <div class="adm-panel" style="border-top: 3px solid #F97316;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h4 style="color: #FB923C; font-size: 15px;"><i class="fas fa-mobile-alt"></i> Nagad</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                                        <input type="checkbox" id="payNagadActive" checked style="width: auto;"> Active
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label>Account Number</label>
+                                    <input type="text" id="payNagadNumber" value="01718404195">
+                                </div>
+                                <div class="form-group">
+                                    <label>Account Type / Name</label>
+                                    <input type="text" id="payNagadName" value="Nagad Personal">
+                                </div>
+                            </div>
+
+                            <!-- Rocket -->
+                            <div class="adm-panel" style="border-top: 3px solid #8B5CF6;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h4 style="color: #A78BFA; font-size: 15px;"><i class="fas fa-mobile-alt"></i> Rocket</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                                        <input type="checkbox" id="payRocketActive" checked style="width: auto;"> Active
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label>Account Number</label>
+                                    <input type="text" id="payRocketNumber" value="01718404195">
+                                </div>
+                                <div class="form-group">
+                                    <label>Account Type / Name</label>
+                                    <input type="text" id="payRocketName" value="Rocket Personal">
+                                </div>
+                            </div>
+
+                            <!-- Binance / Crypto -->
+                            <div class="adm-panel" style="border-top: 3px solid #FACC15;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <h4 style="color: #FDE047; font-size: 15px;"><i class="fab fa-bitcoin"></i> Binance USDT / Crypto</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                                        <input type="checkbox" id="payBinanceActive" checked style="width: auto;"> Active
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label>USDT (TRC20) Wallet or Pay ID</label>
+                                    <input type="text" id="payBinanceNumber" value="TP8B9j6s5... / Pay ID: 12345678">
+                                </div>
+                                <div class="form-group">
+                                    <label>Display Name</label>
+                                    <input type="text" id="payBinanceName" value="Binance USDT (TRC20)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 4: NOTICES & CONTACT SUPPORT
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-notices">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Notices, Announcements & WhatsApp Routing</h3>
+                                <p>Manage what visitors see in the top announcement bar and where WhatsApp verification leads.</p>
+                            </div>
+                            <button class="btn-primary-save" id="btnSaveNotices">
+                                <i class="fas fa-save"></i> Save Notices & Support
+                            </button>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 18px;">
+                            <!-- Top Marquee Banner -->
+                            <div class="adm-panel">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4>⚡ Top Scrolling Marquee Notice</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px;">
+                                        <input type="checkbox" id="noticeEnabled" checked style="width: auto;"> Display on Site
+                                    </label>
+                                </div>
+                                <textarea id="noticeText" rows="2" placeholder="Announcement banner text..."></textarea>
+                            </div>
+
+                            <!-- WhatsApp Verification Number -->
+                            <div class="adm-panel">
+                                <h4 style="margin-bottom: 10px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp Support & Order Delivery</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>WhatsApp Verification Phone (with Country Code) *</label>
+                                        <input type="text" id="supportWhatsappNumber" value="8801727400370" placeholder="e.g. 8801727400370">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Official Telegram Channel Link *</label>
+                                        <input type="text" id="supportTelegramUrl" value="https://t.me/+nE1pT80-i6oyOGU1/" placeholder="https://t.me/...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Popup Announcement Modal -->
+                            <div class="adm-panel">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4>📢 Visitor Popup Alert Modal</h4>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px;">
+                                        <input type="checkbox" id="popupEnabled" style="width: auto;"> Show Popup to Visitors
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label>Popup Title</label>
+                                    <input type="text" id="popupTitle" value="VIP SPECIAL ANNOUNCEMENT" placeholder="Special Offer or Notice Title">
+                                </div>
+                                <div class="form-group">
+                                    <label>Popup Message Content</label>
+                                    <textarea id="popupMessage" rows="2" placeholder="Detailed announcement message..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 5: CURRENCIES & STORE SETTINGS
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-currencies">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Multi-Currency Exchange Rates & Store Info</h3>
+                                <p>Set base prices in BDT. The system calculates INR, NPR, and PKR based on these conversion rates.</p>
+                            </div>
+                            <button class="btn-primary-save" id="btnSaveCurrencies">
+                                <i class="fas fa-save"></i> Save Rates & Info
+                            </button>
+                        </div>
+
+                        <div class="form-row" style="margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Store Name</label>
+                                <input type="text" id="storeName" value="ZERO EXCEPTION">
+                            </div>
+                            <div class="form-group">
+                                <label>Store Tagline</label>
+                                <input type="text" id="storeTagline" value="Fast, Trusted 24/7 Digital Game Key Store">
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 12px; font-size: 15px;">Currency Conversion Multipliers (relative to 1 BDT):</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                            <div class="adm-panel">
+                                <label style="font-weight: 800;">🇧🇩 BDT (Base ৳)</label>
+                                <input type="number" id="rateBDT" value="1" disabled style="opacity: 0.6; margin-top: 6px;">
+                            </div>
+                            <div class="adm-panel">
+                                <label style="font-weight: 800;">🇮🇳 INR (Rate ₹)</label>
+                                <input type="number" step="0.01" id="rateINR" value="0.70" style="margin-top: 6px;">
+                            </div>
+                            <div class="adm-panel">
+                                <label style="font-weight: 800;">🇳🇵 NPR (Rate Rs)</label>
+                                <input type="number" step="0.01" id="rateNPR" value="1.12" style="margin-top: 6px;">
+                            </div>
+                            <div class="adm-panel">
+                                <label style="font-weight: 800;">🇵🇰 PKR (Rate Rs)</label>
+                                <input type="number" step="0.01" id="ratePKR" value="2.32" style="margin-top: 6px;">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 6: VERCEL PUBLISHING & CATALOG HUB
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-sync">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>⚡ Vercel Deployment & Catalog Hub</h3>
+                                <p>Manage, export, and publish your product catalog directly to Vercel without third-party services.</p>
+                            </div>
+                            <button class="btn-primary-save" id="btnDownloadProductsTop">
+                                <i class="fas fa-download"></i> Download products.json
+                            </button>
+                        </div>
+
+                        <!-- Info Banner -->
+                        <div class="sync-guide-box" style="margin-bottom: 20px;">
+                            <strong>🚀 How to Update Your Live Vercel Store in 2 Steps:</strong><br>
+                            1. Edit, add, or delete products in this admin console — all changes save immediately in your browser and live store tab.<br>
+                            2. Click <strong>Download Updated products.json</strong> below, replace the file in your project folder, and push to GitHub (Vercel automatically updates the live website within 15 seconds!).
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- CARD 0: 100% AUTOMATED GITHUB & VERCEL AUTO-DEPLOY -->
+                            <div class="sync-provider-card" style="border: 2px solid var(--adm-accent); background: rgba(0, 252, 202, 0.03);">
+                                <div class="sync-card-header">
+                                    <div style="display: flex; align-items: center; gap: 14px;">
+                                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 252, 202, 0.15); color: var(--adm-accent); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                            <i class="fab fa-github"></i>
+                                        </div>
+                                        <div>
+                                            <h4 style="font-size: 16px; color: var(--adm-accent);">⚡ 100% Automated GitHub & Vercel Sync</h4>
+                                            <p style="font-size: 12px; color: var(--adm-text-secondary);">Save product updates directly to your GitHub repository with zero manual downloads. Vercel auto-deploys within 15 seconds!</p>
+                                        </div>
+                                    </div>
+                                    <span class="sync-provider-badge idle" id="ghAutoDeployBadge">⚪ Enter Token to Enable</span>
+                                </div>
+
+                                <div class="form-row" style="margin-top: 14px;">
+                                    <div class="form-group" style="flex: 2;">
+                                        <label style="font-size: 12px; font-weight: 700;">GitHub Repository</label>
+                                        <input type="text" id="ghRepoName" value="toqysfreefire-cmyk/zero-exception-panel" placeholder="owner/repo">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label style="font-size: 12px; font-weight: 700;">Branch</label>
+                                        <input type="text" id="ghBranchName" value="main" placeholder="main">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label style="font-size: 12px; font-weight: 700;">GitHub Personal Access Token</label>
+                                        <input type="password" id="ghPersonalToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--adm-border);">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--adm-text);">
+                                        <input type="checkbox" id="ghAutoDeployOnSave" checked style="width: auto;">
+                                        🚀 Automatically Commit to GitHub on Every Save / Edit / Delete
+                                    </label>
+
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <button class="btn-primary-save" id="btnSaveGitHubConfig" style="padding: 9px 18px; font-size: 12.5px;">
+                                            <i class="fas fa-save"></i> Save GitHub Settings
+                                        </button>
+                                        <button class="btn-secondary-cancel" id="btnTriggerGitHubDeployNow" style="padding: 9px 18px; font-size: 12.5px;">
+                                            <i class="fas fa-cloud-upload-alt"></i> Push Catalog to GitHub Now
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--adm-border); border-radius: 8px; padding: 12px; margin-top: 14px; font-size: 12px; color: var(--adm-text-secondary); line-height: 1.6;">
+                                    <strong style="color: var(--adm-text);">🔑 30-Second Setup to Enable 0-Click Auto Deploy:</strong><br>
+                                    1. Go to <a href="https://github.com/settings/tokens/new" target="_blank" style="color: var(--adm-accent); text-decoration: underline;">github.com/settings/tokens/new</a> (log into your GitHub account).<br>
+                                    2. Set Note: <code>Zero Admin Auto Deploy</code>, Expiration: <code>No expiration</code>, and check the <strong><code>repo</code></strong> box (Full control of private repositories).<br>
+                                    3. Click <strong>Generate token</strong> at the bottom, copy the token (starts with <code>ghp_...</code>), paste it above, and click <strong>Save GitHub Settings</strong>.<br>
+                                    🎉 Done! Any product or price change you save will now automatically push to GitHub and auto-deploy to Vercel in 15 seconds without any manual work!
+                                </div>
+                            </div>
+
+                            <!-- CARD 1: 1-CLICK CATALOG DOWNLOAD & CLIPBOARD -->
+                            <div class="sync-provider-card" style="border-color: var(--adm-accent);">
+                                <div class="sync-card-header">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <i class="fas fa-file-code" style="font-size: 26px; color: var(--adm-accent);"></i>
+                                        <div>
+                                            <h4 style="font-size: 16px;">Download Store Data Files</h4>
+                                            <p style="font-size: 12px; color: var(--adm-text-secondary);">Download the latest clean JSON files to commit to your GitHub repository or replace in your local folder.</p>
+                                        </div>
+                                    </div>
+                                    <span class="sync-provider-badge active" id="catalogLiveBadge">Catalog Ready</span>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                    <button class="btn-primary-save" id="btnDownloadProductsJson" style="padding: 11px 20px; font-size: 13px;">
+                                        <i class="fas fa-download"></i> Download Updated products.json
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnCopyProductsJson" style="padding: 11px 20px; font-size: 13px;">
+                                        <i class="fas fa-copy"></i> Copy products.json to Clipboard
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnDownloadSettingsJson" style="padding: 11px 20px; font-size: 13px;">
+                                        <i class="fas fa-download"></i> Download settings.json
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CARD 2: IMPORT EXISTING PRODUCTS.JSON -->
+                            <div class="sync-provider-card">
+                                <div class="sync-card-header">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <i class="fas fa-file-import" style="font-size: 26px; color: #3B82F6;"></i>
+                                        <div>
+                                            <h4 style="font-size: 16px;">Import products.json File</h4>
+                                            <p style="font-size: 12px; color: var(--adm-text-secondary);">Upload a new or backup products.json file to instantly load it into this admin panel.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px;">
+                                    <input type="file" id="importProductsFileInput" accept=".json,application/json" style="display: none;">
+                                    <button class="btn-secondary-cancel" id="btnTriggerImportProducts" style="padding: 10px 18px; font-size: 13px;">
+                                        <i class="fas fa-upload"></i> Choose products.json File to Import
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnReloadServerCatalog" style="padding: 10px 18px; font-size: 13px;" title="Discard local draft and reload from server products.json">
+                                        <i class="fas fa-sync-alt"></i> Reload Server products.json
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CARD 3: CATALOG HEALTH & DEDUPLICATION -->
+                            <div class="sync-provider-card">
+                                <div class="sync-card-header">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <i class="fas fa-broom" style="font-size: 26px; color: #F59E0B;"></i>
+                                        <div>
+                                            <h4 style="font-size: 16px;">Catalog Maintenance & Cleanup</h4>
+                                            <p style="font-size: 12px; color: var(--adm-text-secondary);">Clean up any test duplicate cards or restore clean factory state.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                    <button class="btn-secondary-cancel" id="btnCleanDuplicatesSyncTab" style="padding: 10px 18px; font-size: 13px;">
+                                        <i class="fas fa-broom"></i> Scan & Clean Duplicates
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnResetToDefaults" style="padding: 10px 18px; font-size: 13px; color: #F87171;">
+                                        <i class="fas fa-undo"></i> Reset to Default 18 Products
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 7: BACKUP & FACTORY RESET
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-backup">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Full Store Data Backup & Restore</h3>
+                                <p>Export all products, configurations, and admin roles into a single timestamped JSON backup file.</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="adm-panel" style="border-left: 4px solid var(--adm-accent);">
+                                <h4 style="margin-bottom: 6px;">📥 Export System Backup</h4>
+                                <p style="font-size: 12.5px; color: var(--adm-text-secondary); margin-bottom: 14px;">Download all your catalog and store configurations in a single file.</p>
+                                <button class="btn-primary-save" id="btnExportFullBackup">
+                                    <i class="fas fa-download"></i> Export Complete Store Backup (.json)
+                                </button>
+                            </div>
+
+                            <div class="adm-panel" style="border-left: 4px solid var(--adm-purple);">
+                                <h4 style="margin-bottom: 6px;">📤 Restore System Backup</h4>
+                                <p style="font-size: 12.5px; color: var(--adm-text-secondary); margin-bottom: 14px;">Upload a previously saved backup file to restore all store products and settings.</p>
+                                <input type="file" id="backupFileInput" accept=".json" style="display: none;">
+                                <button class="btn-secondary-cancel" id="btnTriggerRestoreUpload">
+                                    <i class="fas fa-upload"></i> Choose Backup File & Restore
+                                </button>
+                            </div>
+
+                            <div class="adm-panel" style="border-left: 4px solid var(--adm-red);">
+                                <h4 style="margin-bottom: 6px; color: #F87171;">⚠️ Factory Reset</h4>
+                                <p style="font-size: 12.5px; color: var(--adm-text-secondary); margin-bottom: 14px;">Clear all local cache overrides and reset to original clean products from the server.</p>
+                                <button class="btn-secondary-cancel" id="btnFactoryReset" style="border-color: rgba(239, 68, 68, 0.4); color: #FCA5A5;">
+                                    <i class="fas fa-trash-alt"></i> Reset to Original Factory Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================
+                     TAB 8: ADMIN TEAM & ROLES
+                     ============================================================ -->
+                <section class="tab-pane" id="tab-admins">
+                    <div class="adm-panel">
+                        <div class="panel-header">
+                            <div class="panel-header-left">
+                                <h3>Admin Team & Role Management</h3>
+                                <p>Manage sub-admin credentials, grant granular permission privileges, or update the master admin password.</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-primary-save" id="btnOpenAddSubAdmin">
+                                    <i class="fas fa-user-plus"></i> Add Sub-Admin
+                                </button>
+                                <button class="btn-secondary-cancel" id="btnToggleChangeSuperPass">
+                                    <i class="fas fa-key"></i> Change Master Password
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Change Super Password Form Box -->
+                        <div id="superAdminPassForm" style="display: none; background: var(--adm-surface); border: 1.5px solid var(--adm-border); border-radius: 12px; padding: 20px; margin-bottom: 22px;">
+                            <h4 style="margin-bottom: 6px; color: var(--adm-accent);"><i class="fas fa-crown"></i> Change Master Super Admin Password</h4>
+                            <p style="font-size: 12px; color: var(--adm-text-secondary); margin-bottom: 14px;">This updates the password for master login (<code>tgsgaming2024@gmail.com</code>).</p>
+                            <form id="formChangeSuperPass" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                                <div class="form-group" style="flex: 1; min-width: 200px;">
+                                    <label>New Master Password *</label>
+                                    <input type="password" id="newSuperPass" required placeholder="Enter new strong password">
+                                </div>
+                                <div class="form-group" style="flex: 1; min-width: 200px;">
+                                    <label>Confirm Password *</label>
+                                    <input type="password" id="confirmSuperPass" required placeholder="Re-enter password">
+                                </div>
+                                <button type="submit" class="btn-primary-save" style="padding: 10px 18px;">
+                                    <i class="fas fa-check"></i> Update Password
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Sub-Admins List -->
+                        <div id="subAdminsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SUB-ADMIN MODAL DIALOG -->
+                <div class="modal-overlay" id="subAdminModal">
+                    <div class="modal-dialog">
+                        <button class="modal-close-btn" id="btnCloseSubAdminModal">&times;</button>
+                        <h3 id="subAdminModalTitle" style="margin-bottom: 6px; font-size: 18px;">Add Sub-Admin</h3>
+                        <p style="font-size: 12px; color: var(--adm-text-secondary); margin-bottom: 18px;">Create a secondary admin account with custom permissions.</p>
+
+                        <form id="subAdminForm">
+                            <input type="hidden" id="subAdminEditId" value="">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label>Full Name *</label>
+                                <input type="text" id="subAdminName" required placeholder="e.g. Moderator Alex">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label>Email Address *</label>
+                                <input type="email" id="subAdminEmail" required placeholder="alex@zeroexception.com">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label>Password *</label>
+                                <input type="password" id="subAdminPassword" required placeholder="Password">
+                            </div>
+
+                            <div class="form-row" style="margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label>Assigned Role</label>
+                                    <select id="subAdminRoleSelect">
+                                        <option value="Manager">Manager</option>
+                                        <option value="Editor">Product Editor</option>
+                                        <option value="Support">Support Staff</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Account Status</label>
+                                    <select id="subAdminStatusSelect">
+                                        <option value="active">Active</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="background: var(--adm-surface); border: 1.5px solid var(--adm-border); border-radius: 8px; padding: 14px; margin-bottom: 18px;">
+                                <label style="font-size: 11px; font-weight: 800; color: var(--adm-text-secondary); text-transform: uppercase; margin-bottom: 10px; display: block;">
+                                    Assigned Permission Privileges
+                                </label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permProductsManage" checked style="width: auto;"> Add / Edit Products
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permProductsDelete" checked style="width: auto;"> Delete Products
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permPaymentsManage" checked style="width: auto;"> Payment Gateways
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permNoticesManage" checked style="width: auto;"> Notices & WhatsApp
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permCurrenciesManage" checked style="width: auto;"> Currencies & Rates
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="permSyncManage" checked style="width: auto;"> Vercel / Cloud Sync
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; grid-column: span 2;">
+                                        <input type="checkbox" id="permBackupManage" style="width: auto;"> System Backup & Reset
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn-primary-save" id="btnSaveSubAdmin" style="flex: 1; justify-content: center;">
+                                    <i class="fas fa-save"></i> Save Admin Account
+                                </button>
+                                <button type="button" class="btn-secondary-cancel" id="btnCancelSubAdminModal">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- VERCEL DEPLOY HUB MODAL -->
+                <div class="modal-overlay" id="netlifyDeployModal">
+                    <div class="modal-dialog" style="max-width: 600px;">
+                        <button class="modal-close-btn" id="btnCloseNetlifyDeployModal">&times;</button>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(0, 252, 202, 0.15); color: var(--adm-accent); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 18px;">Publish to Live Vercel Website</h3>
+                                <p style="font-size: 12px; color: var(--adm-text-secondary);">Your edits are saved and live in this browser. To publish to all visitors on Vercel:</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 18px;">
+                            <div style="background: var(--adm-surface); border: 1.5px solid var(--adm-accent); border-radius: var(--adm-radius); padding: 18px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong style="color: var(--adm-accent); font-size: 14px;"><i class="fas fa-cloud-upload-alt"></i> Fast 2-Step Vercel Deployment</strong>
+                                    <span class="badge-tag" style="background: rgba(0, 252, 202, 0.2); color: var(--adm-accent); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px;">AUTOMATED</span>
+                                </div>
+                                <ol style="font-size: 12.5px; color: var(--adm-text-secondary); line-height: 1.8; margin: 0; padding-left: 20px;">
+                                    <li>Click <strong>Download Updated products.json</strong> below.</li>
+                                    <li>Replace the <code>products.json</code> file inside your <code>panel selling web</code> folder.</li>
+                                    <li>Push to your GitHub repository (or upload to github.com) — Vercel will build and deploy the update live in 15 seconds!</li>
+                                </ol>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;">
+                                    <button class="btn-primary-save" id="btnModalDownloadProducts" style="padding: 10px 18px; font-size: 13px;">
+                                        <i class="fas fa-download"></i> Download Updated products.json
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnModalCopyJson" style="padding: 10px 18px; font-size: 13px;">
+                                        <i class="fas fa-copy"></i> Copy JSON
+                                    </button>
+                                    <button class="btn-secondary-cancel" id="btnModalDownloadSettings" style="padding: 10px 18px; font-size: 13px;">
+                                        <i class="fas fa-download"></i> settings.json
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="adm-toast-container" id="toastContainer"></div>
+
+    <!-- Admin Logic Engine -->
+    <script src="admin.js"></script>
+</body>
+</html>
